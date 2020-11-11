@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Terminal, { ColorMode, LineType } from 'react-terminal-ui';
 import * as _ from 'lodash';
 
-let pingInputs = [];
 let toalRequests = 0;
 let lostRequests = 0;
 let preRequestTime = 0;
@@ -34,12 +33,24 @@ const App = (props = {}) => {
     }
   }, [aborted, lastPrinted]);
 
+  const noCacheFetch = async (url) => {
+    const myHeaders = new Headers();
+    myHeaders.append('pragma', 'no-cache');
+    myHeaders.append('cache-control', 'no-cache');
+
+    const myInit = {
+      method: 'GET',
+      headers: myHeaders,
+    };
+    await fetch(url, myInit);
+  };
+
   const ping = async (url, aborted) => {
     toalRequests += 1;
     preRequestTime = new Date().getTime();
     postRequestTime = 0;
     try {
-      await fetch(url);
+      await noCacheFetch(url);
       postRequestTime = new Date().getTime();
       handleInput(`reply from ${url}: seq=${toalRequests} time=${postRequestTime - preRequestTime} ms`);
     } catch (err) {
