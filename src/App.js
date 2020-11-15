@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Terminal, { ColorMode, LineType } from 'react-terminal-ui';
+import { noCacheFetch } from './lib/ping';
 import * as _ from 'lodash';
 
 let toalRequests = 0;
@@ -7,13 +8,15 @@ let lostRequests = 0;
 let preRequestTime = 0;
 let postRequestTime = 0;
 
+const welcomeLines = [
+  { type: LineType.Output, value: 'Welcome cantconnect.online!' },
+  { type: LineType.Output, value: 'We will start record your network connectivity in few seconds.' }
+];
+
 const App = (props = {}) => {
   const [aborted, setAborted] = useState(false);
   const [lastPrinted, setLastPrinted] = useState(false);
-  const [terminalLineData, setTerminalLineData] = useState([
-    { type: LineType.Output, value: 'Welcome cantconnect.online!' },
-    { type: LineType.Output, value: 'We will start record your network connectivity in few seconds.' }
-  ]);
+  const [terminalLineData, setTerminalLineData] = useState(welcomeLines);
 
   useEffect(() => {
     if (!aborted) {
@@ -33,18 +36,6 @@ const App = (props = {}) => {
     }
   }, [aborted, lastPrinted]);
 
-  const noCacheFetch = async (url) => {
-    const myHeaders = new Headers();
-    myHeaders.append('pragma', 'no-cache');
-    myHeaders.append('cache-control', 'no-cache');
-
-    const myInit = {
-      method: 'GET',
-      headers: myHeaders,
-    };
-    await fetch(url, myInit);
-  };
-
   const ping = async (url, aborted) => {
     toalRequests += 1;
     preRequestTime = new Date().getTime();
@@ -54,6 +45,7 @@ const App = (props = {}) => {
       postRequestTime = new Date().getTime();
       handleInput(`reply from ${url}: seq=${toalRequests} time=${postRequestTime - preRequestTime} ms`);
     } catch (err) {
+      postRequestTime = new Date().getTime();
       handleInput(`connection lost to ${url}: seq=${toalRequests}`);
       lostRequests += 1;
     }

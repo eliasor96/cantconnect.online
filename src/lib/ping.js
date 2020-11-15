@@ -23,5 +23,16 @@ const ping = async (url, aborted, append) => {
     }
 };
 
+const noCacheFetch = async (url) => {
+    const myHeaders = new Headers();
+    myHeaders.append('pragma', 'no-cache');
+    myHeaders.append('cache-control', 'no-cache');
 
-export default ping;
+    const myInit = {
+        method: 'GET',
+        headers: myHeaders,
+    };
+    await fetch(url, myInit);
+};
+
+export { ping, noCacheFetch };
